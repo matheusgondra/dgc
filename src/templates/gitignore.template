@@ -1,0 +1,8 @@
+# Build directories
+/build/
+
+# IDE / Editor files
+.vscode/*
+!.vscode/settings.json
+.DS_Store
+Thumbs.db

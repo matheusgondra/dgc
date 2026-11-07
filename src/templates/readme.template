@@ -1,0 +1,46 @@
+# $NAME$
+
+A modern C23 project template configured with CMake, Ninja, and vcpkg support.
+
+## Prerequisites
+
+Make sure you have the following tools installed on your system:
+- **CMake** (version 3.25 or higher)
+- **Ninja** (build system)
+- **vcpkg** (with the `VCPKG_ROOT` environment variable configured)
+- A modern C23 compatible compiler (such as **GCC 14+** or **Clang 18+**)
+
+## Getting Started
+
+1. Clone or initialize your project folder.
+2. Ensure your `VCPKG_ROOT` environment variable is set:
+   ```bash
+   export VCPKG_ROOT=/path/to/vcpkg
+   ```
+
+## Building the Project
+
+This project uses **CMake Presets** to simplify the build configuration.
+
+### Configure the Project
+```bash
+cmake --preset default
+```
+
+### Build the Binary
+```bash
+cmake --build --preset default
+```
+
+## Running the Executable
+
+After a successful build, you can run the binary directly from the build directory:
+
+- **Linux / macOS:**
+  ```bash
+  ./build/$NAME$
+  ```
+- **Windows (PowerShell):**
+  ```powershell
+  .\build\Debug\$NAME$.exe
+  ```

@@ -1,0 +1,17 @@
+#include "library.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+  User *user = User_create(1, "John");
+  if (!user) {
+    fprintf(stderr, "Failed to create user\n");
+    return EXIT_FAILURE;
+  }
+
+  printf("User ID: %u, Name: %s\n", user->id, user->name);
+
+  User_destroy(user);
+
+  return EXIT_SUCCESS;
+}

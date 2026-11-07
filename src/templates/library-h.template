@@ -1,0 +1,11 @@
+#pragma once
+
+#include <stdint.h>
+
+typedef struct {
+  uint32_t id;
+  char *name;
+} User;
+
+User *User_create(uint32_t id, const char *name);
+void User_destroy(User *user);

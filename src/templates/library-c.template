@@ -1,0 +1,26 @@
+#include "library.h"
+#include <stdlib.h>
+#include <string.h>
+
+User *User_create(uint32_t id, const char *name) {
+  User *user = (User *)malloc(sizeof(User));
+  if (user == nullptr) {
+    return nullptr;
+  }
+
+  user->id = id;
+  user->name = strdup(name);
+  if (user->name == nullptr) {
+    User_destroy(user);
+    return nullptr;
+  }
+
+  return user;
+}
+
+void User_destroy(User *user) {
+  if (user) {
+    free(user->name);
+    free(user);
+  }
+}
