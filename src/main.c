@@ -4,6 +4,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 static void print_help(const char *program_name) {
   printf(COLOR_BOLD "Usage:" COLOR_RESET " %s [OPTIONS] <project_name>\n\n",
          program_name);
@@ -25,6 +29,16 @@ static void print_version(void) {
 }
 
 int main(int argc, char *argv[]) {
+#ifdef _WIN32
+  HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+  if (hOut != INVALID_HANDLE_VALUE) {
+    DWORD dwMode = 0;
+    if (GetConsoleMode(hOut, &dwMode)) {
+      dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+      SetConsoleMode(hOut, dwMode);
+    }
+  }
+#endif
   if (argc < 2) {
     print_help(argv[0]);
     return EXIT_FAILURE;
