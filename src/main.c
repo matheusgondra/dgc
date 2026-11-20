@@ -1,30 +1,42 @@
 #include "colors.h"
 #include "templates.h"
 #include "utils.h"
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 static void print_help(const char *program_name);
 static void print_version(void);
 
 int main(int argc, char *argv[]) {
-  if (argc < 2) {
+  static const struct option long_opts[] = {
+      {"help", no_argument, nullptr, 'h'},
+      {"version", no_argument, nullptr, 'v'},
+      {nullptr, 0, nullptr, 0}};
+
+  int opt = -1;
+
+  while ((opt = getopt_long(argc, argv, "hv", long_opts, nullptr)) != -1) {
+    switch (opt) {
+    case 'h':
+      print_help(argv[0]);
+      return EXIT_SUCCESS;
+    case 'v':
+      print_version();
+      return EXIT_SUCCESS;
+    default:
+      print_help(argv[0]);
+      return EXIT_FAILURE;
+    }
+  }
+
+  if (optind >= argc) {
+    fprintf(stderr, "Error: Missing project name.\n");
     print_help(argv[0]);
     return EXIT_FAILURE;
   }
 
-  if (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0) {
-    print_help(argv[0]);
-    return EXIT_SUCCESS;
-  }
-
-  if (strcmp(argv[1], "-v") == 0 || strcmp(argv[1], "--version") == 0) {
-    print_version();
-    return EXIT_SUCCESS;
-  }
-
-  const char *project_name = argv[1];
+  const char *project_name = argv[optind];
   if (!generate_project(project_name)) {
     fprintf(stderr, "Failed to generate project: %s\n", project_name);
     return EXIT_FAILURE;
