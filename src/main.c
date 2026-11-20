@@ -1,28 +1,12 @@
 #include "colors.h"
 #include "templates.h"
+#include "utils.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-static void print_help(const char *program_name) {
-  printf(COLOR_BOLD "Usage:" COLOR_RESET " %s [OPTIONS] <project_name>\n\n",
-         program_name);
-  printf(COLOR_BOLD "Description:" COLOR_RESET "\n");
-  printf("  %s\n\n", PROJECT_DESCRIPTION);
-  printf(COLOR_BOLD "Options:" COLOR_RESET "\n");
-  printf("  " COLOR_CYAN "-h, --help" COLOR_RESET
-         "     Display this help message and exit\n");
-  printf("  " COLOR_CYAN "-v, --version" COLOR_RESET
-         "  Output version information and exit\n\n");
-  printf(COLOR_BOLD "Examples:" COLOR_RESET "\n");
-  printf("  %s my_awesome_project\n\n", program_name);
-}
-
-static void print_version(void) {
-  printf(COLOR_BOLD "%s" COLOR_RESET " version " COLOR_GREEN "%s" COLOR_RESET
-                    "\n",
-         PROJECT_NAME, PROJECT_VERSION);
-}
+static void print_help(const char *program_name);
+static void print_version(void);
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {
@@ -47,4 +31,23 @@ int main(int argc, char *argv[]) {
   }
 
   return EXIT_SUCCESS;
+}
+
+static void print_help(const char *program_name) {
+  println(COLOR_BOLD "Usage:" COLOR_RESET " %s [OPTIONS] <project_name>\n",
+          program_name);
+  println(COLOR_BOLD "Description:" COLOR_RESET);
+  println("  %s\n", PROJECT_DESCRIPTION);
+  println(COLOR_BOLD "Options:" COLOR_RESET);
+  println("  " COLOR_CYAN "-h, --help" COLOR_RESET
+          "     Display this help message and exit");
+  println("  " COLOR_CYAN "-v, --version" COLOR_RESET
+          "  Output version information and exit\n");
+  println(COLOR_BOLD "Examples:" COLOR_RESET);
+  println("  %s my_awesome_project\n", program_name);
+}
+
+static void print_version(void) {
+  println(COLOR_BOLD "%s" COLOR_RESET " version " COLOR_GREEN "%s" COLOR_RESET,
+          PROJECT_NAME, PROJECT_VERSION);
 }
