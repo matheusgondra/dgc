@@ -16,21 +16,50 @@ jobs:
         include:
           - os: ubuntu-latest
             artifact_name: dgc-linux-x86_64
-            bin_path: build/default/dgc
+            bin_path: build/dgc
           - os: windows-latest
             artifact_name: dgc-windows-x86_64.exe
-            bin_path: build/default/dgc.exe
+            bin_path: build/dgc.exe
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Ninja and CMake (Linux)
+      - name: Install tools (Linux)
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends ninja-build cmake gcc
+          sudo apt-get install -y --no-install-recommends ninja-build cmake gcc git curl zip unzip tar
 
+      - name: Setup vcpkg (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          git clone --depth 1 https://github.com/microsoft/vcpkg.git "$HOME/vcpkg"
+          "$HOME/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
+          echo "VCPKG_ROOT=$HOME/vcpkg" >> "$GITHUB_ENV"
+
+      - name: Setup MSVC & Ninja (Windows)
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Install Ninja (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          if ! command -v ninja >/dev/null 2>&1; then
+            choco install -y ninja --no-progress
+          fi
+
+      - name: Setup vcpkg (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          VCPKG_DIR="$RUNNER_TEMP/vcpkg"
+          git clone --depth 1 https://github.com/microsoft/vcpkg.git "$VCPKG_DIR"
+          "$VCPKG_DIR/bootstrap-vcpkg.bat" -disableMetrics
+          echo "VCPKG_ROOT=$(cygpath -w "$VCPKG_DIR")" >> "$GITHUB_ENV"
       - name: Configure with CMake preset
         shell: bash
         run: cmake --preset default
