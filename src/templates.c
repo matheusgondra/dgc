@@ -1,5 +1,6 @@
 #include "templates.h"
 #include "colors.h"
+#include "utils.h"
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,6 +19,11 @@
 #define create_dir(path) mkdir(path, 0755)
 
 #endif
+
+typedef struct {
+  const char *relative_path;
+  const char *content;
+} TemplateFile;
 
 static const char cmake_lists_template[] = {
 #embed "templates/cmake-lists.template"
@@ -51,96 +57,136 @@ static const char readme_template[] = {
 #embed "templates/readme.template"
     , 0};
 
-static void write_processed_template(const char *path, const char *content,
+static bool path_join(char *dst, size_t dst_size, const char *dir,
+                      const char *file) {
+  int written = snprintf(dst, dst_size, "%s/%s", dir, file);
+  if (written < 0 || (size_t)written >= dst_size) {
+    fprintf(stderr, "Error: Path too long for \"%s/%s\"\n", dir, file);
+    return false;
+  }
+
+  return true;
+}
+
+static bool ensure_dir(const char *path, bool allow_existing) {
+  if (create_dir(path) == 0) {
+    return true;
+  }
+
+  if (allow_existing && errno == EEXIST) {
+    return true;
+  }
+
+  perror("Failed to create directory");
+
+  return false;
+}
+
+[[nodiscard]]
+static bool write_processed_template(const char *path, const char *content,
                                      const char *project_name) {
   FILE *file = fopen(path, "w");
   if (!file) {
     fprintf(stderr, "Failed to create file: %s\n", path);
-    return;
+    return false;
   }
 
   const char *cursor = content;
   const char *token = "$NAME$";
   size_t token_len = strlen(token);
 
+  int result = 0;
+
   while (*cursor != '\0') {
     if (strncmp(cursor, token, token_len) == 0) {
-      fputs(project_name, file);
+      result = fputs(project_name, file);
+      if (result == EOF) {
+        fclose(file);
+        return false;
+      }
+
       cursor += token_len;
     } else {
-      fputc(*cursor, file);
+      result = fputc(*cursor, file);
+      if (result == EOF) {
+        fclose(file);
+        return false;
+      }
+
       cursor++;
     }
   }
 
-  fclose(file);
-}
-
-[[nodiscard]] bool generate_project(const char *project_name) {
-  char path_buffer[512];
-
-  printf("\n" COLOR_BOLD "🚀 Generating C23 project: %s" COLOR_RESET "\n\n",
-         project_name);
-
-  if (create_dir(project_name) != 0 && errno != EEXIST) {
-    perror("Failed to create project directory");
+  result = fclose(file);
+  if (result != 0) {
     return false;
   }
 
-  create_dir(
-      snprintf(path_buffer, sizeof(path_buffer), "%s/include", project_name) > 0
-          ? path_buffer
-          : "");
-  create_dir(
-      snprintf(path_buffer, sizeof(path_buffer), "%s/src", project_name) > 0
-          ? path_buffer
-          : "");
-  create_dir(
-      snprintf(path_buffer, sizeof(path_buffer), "%s/.vscode", project_name) > 0
-          ? path_buffer
-          : "");
+  return true;
+}
 
-  snprintf(path_buffer, sizeof(path_buffer), "%s/vcpkg.json", project_name);
-  write_processed_template(path_buffer, vcpkg_template, project_name);
+[[nodiscard]]
+bool generate_project(const char *project_name, bool force) {
+  char path_buffer[512];
+  char file_buffer[512];
 
-  snprintf(path_buffer, sizeof(path_buffer), "%s/CMakeLists.txt", project_name);
-  write_processed_template(path_buffer, cmake_lists_template, project_name);
+  println("");
+  println(BOLD("🚀 Generating C23 project: %s"), project_name);
+  println("");
 
-  snprintf(path_buffer, sizeof(path_buffer), "%s/CMakePresets.json",
-           project_name);
-  write_processed_template(path_buffer, cmake_presets_template, project_name);
+  if (!ensure_dir(project_name, force)) {
+    return false;
+  }
 
-  snprintf(path_buffer, sizeof(path_buffer), "%s/.gitignore", project_name);
-  write_processed_template(path_buffer, gitignore_template, project_name);
+  const char *subdirs[] = {"include", "src"};
+  const size_t subdir_count = sizeof(subdirs) / sizeof(subdirs[0]);
 
-  snprintf(path_buffer, sizeof(path_buffer), "%s/README.md", project_name);
-  write_processed_template(path_buffer, readme_template, project_name);
+  for (size_t i = 0; i < subdir_count; ++i) {
+    bool path_result =
+        path_join(path_buffer, sizeof(path_buffer), project_name, subdirs[i]);
+    bool dir_result = ensure_dir(path_buffer, force);
+    if (!path_result || !dir_result) {
+      return false;
+    }
+  }
 
-  snprintf(path_buffer, sizeof(path_buffer), "%s/include/library.h",
-           project_name);
-  write_processed_template(path_buffer, library_h_template, project_name);
+  const TemplateFile files[] = {{"vcpkg.json", vcpkg_template},
+                                {"CMakeLists.txt", cmake_lists_template},
+                                {"CMakePresets.json", cmake_presets_template},
+                                {"include/library.h", library_h_template},
+                                {"src/library.c", library_c_template},
+                                {"src/main.c", main_c_template},
+                                {".gitignore", gitignore_template},
+                                {"README.md", readme_template}};
+  const size_t file_count = sizeof(files) / sizeof(files[0]);
 
-  snprintf(path_buffer, sizeof(path_buffer), "%s/src/library.c", project_name);
-  write_processed_template(path_buffer, library_c_template, project_name);
+  for (size_t i = 0; i < file_count; ++i) {
+    bool path_result = path_join(file_buffer, sizeof(file_buffer), project_name,
+                                 files[i].relative_path);
+    bool write_result =
+        write_processed_template(file_buffer, files[i].content, project_name);
+    if (!path_result || !write_result) {
+      return false;
+    }
+  }
 
-  snprintf(path_buffer, sizeof(path_buffer), "%s/src/main.c", project_name);
-  write_processed_template(path_buffer, main_c_template, project_name);
+  println("  " COLORIZE(COLOR_CYAN, "📂 %s"), project_name);
+  println("  ├── " COLORIZE(COLOR_CYAN, "include/") "library.h");
+  println("  ├── " COLORIZE(COLOR_CYAN, "src/") "library.c");
+  println("  ├── " COLORIZE(COLOR_CYAN, "src/") "main.c");
+  println("  ├── CMakeLists.txt");
+  println("  ├── CMakePresets.json");
+  println("  ├── vcpkg.json");
+  println("  ├── .gitignore");
+  println("  └── README.md");
 
-  printf("  " COLOR_CYAN "📂 %s/" COLOR_RESET "\n", project_name);
-  printf("  ├── " COLOR_CYAN "include/" COLOR_RESET "library.h\n");
-  printf("  ├── " COLOR_CYAN "src/" COLOR_RESET "library.c\n");
-  printf("  ├── " COLOR_CYAN "src/" COLOR_RESET "main.c\n");
-  printf("  ├── CMakeLists.txt\n");
-  printf("  ├── CMakePresets.json\n");
-  printf("  ├── vcpkg.json\n");
-  printf("  ├── .gitignore\n");
-  printf("  └── README.md\n");
-
-  printf("\n" COLOR_GREEN "✨ Project successfully created!" COLOR_RESET "\n");
-  printf("👉 Next steps:\n");
-  printf("   cd %s\n", project_name);
-  printf("   cmake --preset default\n");
-  printf("   cmake --build --preset default\n\n");
+  println("");
+  println(COLORIZE(COLOR_GREEN, "✨ Project successfully created!"));
+  println("👉 Next steps:");
+  println("   cd %s", project_name);
+  println("   cmake --preset default");
+  println("   cmake --build --preset default");
+  println("");
 
   return true;
 }

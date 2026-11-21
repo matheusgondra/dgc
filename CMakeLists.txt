@@ -13,6 +13,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_executable(${PROJECT_NAME} 
     src/main.c
     src/templates.c
+    src/command.c
+    src/commands/new.c
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE

@@ -1,3 +1,3 @@
 #pragma once
 
-[[nodiscard]] bool generate_project(const char *project_name);
+[[nodiscard]] bool generate_project(const char *project_name, bool force);
