@@ -5,7 +5,8 @@
 ## Features
 
 - **Modern C23 Standard**: Built using contemporary C features, including `#embed` to embed text templates directly into the binary at compile time (no runtime file dependencies).
-- **Batteries Included**: Generates a complete project layout with source files, headers, presets and ignore rules.
+- **Modular Command Architecture**: Centralized command registry and dedicated option parsing to make adding new commands and flags straightforward.
+- **Batteries Included**: Generates a complete project layout with source files, headers, presets, and ignore rules.
 - **CMake Presets**: Standardized build configurations out of the box.
 - **vcpkg Integration**: Ready for dependency management using manifest mode (`vcpkg.json`).
 - **Clean UI**: Terminal outputs styled with ANSI colors and a clean directory tree preview.
@@ -13,7 +14,7 @@
 ## Prerequisites
 
 Make sure you have the following tools installed on your system:
-- **CMake** (version 3.25 or higher)
+- **CMake** (version 3.20 or higher)
 - **Ninja** (build system)
 - **vcpkg** (with the `VCPKG_ROOT` environment variable configured)
 - A modern C23 compatible compiler (such as **GCC 14+** or **Clang 18+**)
@@ -40,13 +41,25 @@ sudo cmake --install build
 
 ## Usage
 
-Generate a new C23 project by running:
+Generate a new C23 project using the `new` subcommand:
 ```bash
-dgc <project_name>
+dgc new [OPTIONS] <project_name>
 ```
 
-### Options
-- `-h`, `--help`: Display the help message and exit.
+Example:
+```bash
+dgc new my_awesome_project
+```
+
+### Commands
+- `new [OPTIONS] <project_name>`: Create a new C23 project.
+
+### `new` Command Options
+- `-f`, `--force`: Allow an existing project directory.
+- `-h`, `--help`: Display help for the `new` command and exit.
+
+### Global Options
+- `-h`, `--help`: Display global help and exit.
 - `-v`, `--version`: Output version information and exit.
 
 ## License
