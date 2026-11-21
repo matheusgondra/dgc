@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main", "develop"]
+
+jobs:
+  build:
+    name: Build & Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: dgc-linux-x86_64
+            bin_path: build/default/dgc
+          - os: windows-latest
+            artifact_name: dgc-windows-x86_64.exe
+            bin_path: build/default/dgc.exe
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Ninja and CMake (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ninja-build cmake gcc
+
+      - name: Configure with CMake preset
+        shell: bash
+        run: cmake --preset default
+
+      - name: Build binary
+        shell: bash
+        run: cmake --build --preset default
+
+      - name: Smoke test CLI
+        shell: bash
+        run: |
+          BIN="./${{ matrix.bin_path }}"
+          "$BIN" --version
+          "$BIN" new --help
+          TMP_DIR="$(mktemp -d)"
+          (
+            cd "$TMP_DIR"
+            "$OLDPWD/$BIN" new sample_proj
+            test -f sample_proj/CMakeLists.txt
+            test -f sample_proj/src/main.c
+          )
+          rm -rf "$TMP_DIR"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.bin_path }}
