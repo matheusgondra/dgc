@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main", "develop"]
+
+jobs:
+  build:
+    name: Build & Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: dgc-linux-x86_64
+            bin_path: build/dgc
+          - os: windows-latest
+            artifact_name: dgc-windows-x86_64.exe
+            bin_path: build/dgc.exe
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install tools (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ninja-build cmake gcc git curl zip unzip tar
+
+      - name: Setup vcpkg (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          git clone --depth 1 https://github.com/microsoft/vcpkg.git "$HOME/vcpkg"
+          "$HOME/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
+          echo "VCPKG_ROOT=$HOME/vcpkg" >> "$GITHUB_ENV"
+
+      - name: Setup MinGW-w64 & Ninja (Windows)
+        if: runner.os == 'Windows'
+        uses: msys2/setup-msys2@3c51bf698df1e37b2261f53cb67797b97761185c
+        with:
+          msystem: UCRT64
+          update: false
+          path-type: inherit
+          install: >-
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-cmake
+
+      - name: Setup vcpkg (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          VCPKG_DIR="$RUNNER_TEMP/vcpkg"
+          git clone --depth 1 https://github.com/microsoft/vcpkg.git "$VCPKG_DIR"
+          "$VCPKG_DIR/bootstrap-vcpkg.bat" -disableMetrics
+          echo "VCPKG_ROOT=$(cygpath -w "$VCPKG_DIR")" >> "$GITHUB_ENV"
+
+      - name: Configure with CMake preset
+        shell: bash
+        run: cmake --preset default -DCMAKE_C_COMPILER=gcc
+
+      - name: Build binary
+        shell: bash
+        run: cmake --build --preset default
+
+      - name: Smoke test CLI
+        shell: bash
+        run: |
+          BIN="./${{ matrix.bin_path }}"
+          "$BIN" --version
+          "$BIN" new --help
+          TMP_DIR="$(mktemp -d)"
+          (
+            cd "$TMP_DIR"
+            "$OLDPWD/$BIN" new sample_proj
+            test -f sample_proj/CMakeLists.txt
+            test -f sample_proj/src/main.c
+          )
+          rm -rf "$TMP_DIR"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.bin_path }}
