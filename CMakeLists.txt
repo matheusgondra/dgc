@@ -10,6 +10,11 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+if(MSVC)
+    message(FATAL_ERROR
+        "dgc requires GCC or Clang because it uses C23 #embed and POSIX APIs.")
+endif()
+
 add_executable(${PROJECT_NAME} 
     src/main.c
     src/templates.c
@@ -25,10 +30,11 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 
-if(MSVC)
-    target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
-else()
+if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Werror)
+else()
+    message(FATAL_ERROR
+        "Unsupported C compiler: ${CMAKE_C_COMPILER_ID}. Use GCC or Clang.")
 endif()
 
 install(TARGETS ${PROJECT_NAME}

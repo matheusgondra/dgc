@@ -61,11 +61,13 @@ jobs:
 
       - name: Configure with CMake preset
         shell: bash
-        run: cmake --preset default -DCMAKE_C_COMPILER=gcc
+        run: |
+          cmake -E remove_directory build
+          cmake --preset gcc
 
       - name: Build binary
         shell: bash
-        run: cmake --build --preset default
+        run: cmake --build --preset gcc
 
       - name: Smoke test CLI
         shell: bash
