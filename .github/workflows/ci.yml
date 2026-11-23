@@ -59,14 +59,28 @@ jobs:
           "$VCPKG_DIR/bootstrap-vcpkg.bat" -disableMetrics
           echo "VCPKG_ROOT=$(cygpath -w "$VCPKG_DIR")" >> "$GITHUB_ENV"
 
-      - name: Configure with CMake preset
+      - name: Configure with CMake preset (Linux)
+        if: runner.os == 'Linux'
         shell: bash
         run: |
           cmake -E remove_directory build
           cmake --preset gcc
 
-      - name: Build binary
+      - name: Configure with CMake preset (Windows)
+        if: runner.os == 'Windows'
+        shell: msys2 {0}
+        run: |
+          cmake -E remove_directory build
+          cmake --preset gcc
+
+      - name: Build binary (Linux)
+        if: runner.os == 'Linux'
         shell: bash
+        run: cmake --build --preset gcc
+
+      - name: Build binary (Windows)
+        if: runner.os == 'Windows'
+        shell: msys2 {0}
         run: cmake --build --preset gcc
 
       - name: Smoke test CLI
