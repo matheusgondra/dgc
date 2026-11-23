@@ -1,5 +1,7 @@
 # dgc - Gerador de Projetos em C23
 
+[English](README.md) | **Português (PT-BR)**
+
 O `dgc` é uma ferramenta de linha de comando (CLI) moderna e leve escrita em **C (C23)**, projetada para criar (*scaffold*) rapidamente novos projetos em C configurados com **CMake**, **Ninja** e **vcpkg**.
 
 ## Funcionalidades
@@ -32,6 +34,16 @@ cmake --preset default
 ```bash
 cmake --build --preset default
 ```
+
+### Presets CMake Disponíveis
+
+O projeto fornece presets para a configuração padrão e para compilações explícitas com GCC ou Clang:
+
+| Preset | Compilador | Comando de configuração | Comando de compilação |
+| --- | --- | --- | --- |
+| `default` | GCC | `cmake --preset default` | `cmake --build --preset default` |
+| `gcc` | GCC | `cmake --preset gcc` | `cmake --build --preset gcc` |
+| `clang` | Clang | `cmake --preset clang` | `cmake --build --preset clang` |
 
 ### 3. Instalar Globalmente (Opcional)
 Para disponibilizar o `dgc` globalmente no `PATH` do seu sistema:
