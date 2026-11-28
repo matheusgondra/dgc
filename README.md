@@ -16,7 +16,7 @@
 ## Prerequisites
 
 Make sure you have the following tools installed on your system:
-- **CMake** (version 3.20 or higher)
+- **CMake** (version 3.21 or higher)
 - **Ninja** (build system)
 - **vcpkg** (with the `VCPKG_ROOT` environment variable configured)
 - A modern C23 compatible compiler (such as **GCC 14+** or **Clang 18+**)
