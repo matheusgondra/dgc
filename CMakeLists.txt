@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
 project(dgc
-    VERSION 2.0.2
+    VERSION 2.1.0
     LANGUAGES C
     DESCRIPTION "A modern C23 project generator scaffold tool using CMake, Ninja, and vcpkg."
 )
