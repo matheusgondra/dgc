@@ -1,6 +1,6 @@
-#include "String.h"
 #include "colors.h"
 #include "command.h"
+#include "dgc/string.h"
 #include "utils.h"
 #include <getopt.h>
 #include <stdio.h>

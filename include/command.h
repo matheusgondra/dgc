@@ -1,6 +1,6 @@
 #pragma once
 
-#include "String.h"
+#include "dgc/string.h"
 #include <stddef.h>
 
 typedef int (*CommandHandler)(int argc, char *argv[]);

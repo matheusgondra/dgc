@@ -17,7 +17,7 @@ add_library(${PROJECT_NAME}_core STATIC
     src/templates.c
     src/command.c
     src/commands/new.c
-    src/String.c
+    src/dgc/string.c
 )
 
 add_executable(${PROJECT_NAME}

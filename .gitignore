@@ -13,4 +13,3 @@ build/
 *.a
 *.so
 *.exe
-dgc

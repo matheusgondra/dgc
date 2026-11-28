@@ -1,7 +1,7 @@
 #include "commands/new.h"
-#include "String.h"
 #include "colors.h"
 #include "command.h"
+#include "dgc/string.h"
 #include "templates.h"
 #include "utils.h"
 #include <getopt.h>

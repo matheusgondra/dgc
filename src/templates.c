@@ -1,6 +1,6 @@
 #include "templates.h"
-#include "String.h"
 #include "colors.h"
+#include "dgc/string.h"
 #include "utils.h"
 #include <errno.h>
 #include <stdint.h>
@@ -40,11 +40,11 @@ static const char vcpkg_template[] = {
     , 0};
 
 static const char String_h_template[] = {
-#embed "../include/String.h"
+#embed "../include/dgc/string.h"
     , 0};
 
 static const char String_c_template[] = {
-#embed "./String.c"
+#embed "./dgc/string.c"
     , 0};
 
 static const char main_c_template[] = {
@@ -168,10 +168,8 @@ bool generate_project(const string_t *project_name, bool force) {
     return false;
   }
 
-  string_t subdirs[] = {
-      string_from("include"),
-      string_from("src"),
-  };
+  string_t subdirs[] = {string_from("include"), string_from("include/dgc"),
+                        string_from("src"), string_from("src/dgc")};
   const size_t subdir_count = sizeof(subdirs) / sizeof(subdirs[0]);
 
   for (size_t i = 0; i < subdir_count; ++i) {
@@ -191,8 +189,8 @@ bool generate_project(const string_t *project_name, bool force) {
   const TemplateFile files[] = {{"vcpkg.json", vcpkg_template},
                                 {"CMakeLists.txt", cmake_lists_template},
                                 {"CMakePresets.json", cmake_presets_template},
-                                {"include/String.h", String_h_template},
-                                {"src/String.c", String_c_template},
+                                {"include/dgc/string.h", String_h_template},
+                                {"src/dgc/string.c", String_c_template},
                                 {"src/main.c", main_c_template},
                                 {".gitignore", gitignore_template},
                                 {"README.md", readme_template}};
@@ -215,14 +213,10 @@ bool generate_project(const string_t *project_name, bool force) {
   }
 
   println("  " COLORIZE(COLOR_CYAN, "📂 %s"), project_name_cstr);
-  println("  ├── " COLORIZE(COLOR_CYAN, "include/") "library.h");
-  println("  ├── " COLORIZE(COLOR_CYAN, "src/") "library.c");
-  println("  ├── " COLORIZE(COLOR_CYAN, "src/") "main.c");
-  println("  ├── CMakeLists.txt");
-  println("  ├── CMakePresets.json");
-  println("  ├── vcpkg.json");
-  println("  ├── .gitignore");
-  println("  └── README.md");
+  for (size_t i = 0; i < file_count; ++i) {
+    const char *branch = i + 1 == file_count ? "└──" : "├──";
+    println("  %s %s", branch, files[i].relative_path);
+  }
 
   println("");
   println(COLORIZE(COLOR_GREEN, "✨ Project successfully created!"));

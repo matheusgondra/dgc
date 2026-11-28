@@ -1,6 +1,6 @@
 #include "command.h"
-#include "String.h"
 #include "commands/new.h"
+#include "dgc/string.h"
 #include <string.h>
 
 constexpr size_t COMMAND_COUNT = 1;
