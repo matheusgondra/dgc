@@ -16,7 +16,7 @@ O `dgc` é uma ferramenta de linha de comando (CLI) moderna e leve escrita em **
 ## Pré-requisitos
 
 Certifique-se de ter as seguintes ferramentas instaladas no seu sistema:
-- **CMake** (versão 3.20 ou superior)
+- **CMake** (versão 3.21 ou superior)
 - **Ninja** (sistema de build)
 - **vcpkg** (com a variável de ambiente `VCPKG_ROOT` configurada)
 - Um compilador compatível com C23 (como **GCC 14+** ou **Clang 18+**)
