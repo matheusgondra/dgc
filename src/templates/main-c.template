@@ -1,17 +1,17 @@
-#include "library.h"
+#include "String.h"
 #include <stdio.h>
 #include <stdlib.h>
 
 int main() {
-  User *user = User_create(1, "John");
-  if (!user) {
-    fprintf(stderr, "Failed to create user\n");
-    return EXIT_FAILURE;
-  }
+  printf("Created with String API\n");
 
-  printf("User ID: %u, Name: %s\n", user->id, user->name);
+  string_t message = string_from("Hello World");
+  size_t message_length = string_length(&message);
 
-  User_destroy(user);
+  string_println(&message);
+  printf("Message length: %zu\n", message_length);
+
+  string_free(&message);
 
   return EXIT_SUCCESS;
 }

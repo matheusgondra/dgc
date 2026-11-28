@@ -39,12 +39,12 @@ static const char vcpkg_template[] = {
 #embed "templates/vcpkg.template"
     , 0};
 
-static const char library_h_template[] = {
-#embed "templates/library-h.template"
+static const char String_h_template[] = {
+#embed "../include/String.h"
     , 0};
 
-static const char library_c_template[] = {
-#embed "templates/library-c.template"
+static const char String_c_template[] = {
+#embed "./String.c"
     , 0};
 
 static const char main_c_template[] = {
@@ -191,8 +191,8 @@ bool generate_project(const string_t *project_name, bool force) {
   const TemplateFile files[] = {{"vcpkg.json", vcpkg_template},
                                 {"CMakeLists.txt", cmake_lists_template},
                                 {"CMakePresets.json", cmake_presets_template},
-                                {"include/library.h", library_h_template},
-                                {"src/library.c", library_c_template},
+                                {"include/String.h", String_h_template},
+                                {"src/String.c", String_c_template},
                                 {"src/main.c", main_c_template},
                                 {".gitignore", gitignore_template},
                                 {"README.md", readme_template}};
