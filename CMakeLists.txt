@@ -32,7 +32,16 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 
 if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
-    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Werror)
+    target_compile_options(${PROJECT_NAME} PRIVATE
+        -Wall -Wextra -Werror
+        -fsanitize=address,undefined
+        -fno-omit-frame-pointer
+    )
+    target_link_options(${PROJECT_NAME} PRIVATE
+        -fsanitize=address,undefined
+        -fno-omit-frame-pointer
+    )
+
 else()
     message(FATAL_ERROR
         "Unsupported C compiler: ${CMAKE_C_COMPILER_ID}. Use GCC or Clang.")

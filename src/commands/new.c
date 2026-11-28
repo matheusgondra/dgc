@@ -70,7 +70,7 @@ int handle_new_command(int argc, char *argv[]) {
   }
 
   const char *project_name_cstr = string_to_cstr(&opts.project_name);
-  if (!generate_project(project_name_cstr, opts.force)) {
+  if (!generate_project(&(opts).project_name, opts.force)) {
     fprintf(stderr, "Failed to generated project: %s\n", project_name_cstr);
     string_free(&opts.project_name);
     return EXIT_FAILURE;

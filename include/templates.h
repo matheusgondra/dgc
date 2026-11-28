@@ -1,3 +1,5 @@
 #pragma once
 
-[[nodiscard]] bool generate_project(const char *project_name, bool force);
+#include "String.h"
+
+[[nodiscard]] bool generate_project(const string_t *project_name, bool force);
