@@ -20,6 +20,7 @@ add_executable(${PROJECT_NAME}
     src/templates.c
     src/command.c
     src/commands/new.c
+    src/String.c
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
