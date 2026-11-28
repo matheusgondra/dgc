@@ -1,21 +1,52 @@
 #include "command.h"
+#include "String.h"
 #include "commands/new.h"
 #include <string.h>
 
-static const Command commands[] = {{.name = "new",
-                                    .description = "Create a new C23 project",
-                                    .usage = "[OPTIONS] <project_name>",
-                                    .handler = handle_new_command,
-                                    .help_handler = print_new_command_help}};
+constexpr size_t COMMAND_COUNT = 1;
 
-const Command *command_find(const char *name) {
-  if (!name) {
+static Command commands[COMMAND_COUNT];
+static bool commands_initialized = false;
+
+static void ensure_commands_initialized() {
+  if (commands_initialized) {
+    return;
+  }
+
+  commands[0] =
+      (Command){.name = string_from("new"),
+                .description = string_from("Create a new C23 project"),
+                .usage = string_from("[OPTIONS] <project_name>"),
+                .handler = handle_new_command,
+                .help_handler = print_new_command_help};
+
+  commands_initialized = true;
+}
+
+void command_shutdown() {
+  if (!commands_initialized) {
+    return;
+  }
+
+  for (size_t i = 0; i < COMMAND_COUNT; ++i) {
+    Command *command = &commands[i];
+    string_free(&command->name);
+    string_free(&command->description);
+    string_free(&command->usage);
+  }
+
+  commands_initialized = false;
+}
+
+const Command *command_find(const string_t *name) {
+  if (string_is_empty(name)) {
     return nullptr;
   }
 
-  const size_t count = sizeof(commands) / sizeof(commands[0]);
-  for (size_t i = 0; i < count; ++i) {
-    if (strcmp(name, commands[i].name) == 0) {
+  ensure_commands_initialized();
+
+  for (size_t i = 0; i < COMMAND_COUNT; ++i) {
+    if (string_equals(name, &commands[i].name)) {
       return &commands[i];
     }
   }
@@ -24,8 +55,10 @@ const Command *command_find(const char *name) {
 }
 
 const Command *command_all(size_t *out_count) {
+  ensure_commands_initialized();
+
   if (out_count) {
-    *out_count = sizeof(commands) / sizeof(commands[0]);
+    *out_count = COMMAND_COUNT;
   }
 
   return commands;
